@@ -1,5 +1,7 @@
 import patientsData from "../../data/patients.ts";
 import type {
+  Entry,
+  EntryWithoutId,
   NewPatientEntry,
   NonSensitivePatient,
   Patient,
@@ -11,13 +13,21 @@ const getPatients = (): Patient[] => {
 };
 
 const getNonSensitivePatients = (): NonSensitivePatient[] => {
-  return patientsData.map(({ id, name, dateOfBirth, gender, occupation }) => ({
-    id,
-    name,
-    dateOfBirth,
-    gender,
-    occupation,
-  }));
+  return patientsData.map(
+    ({ id, name, dateOfBirth, gender, occupation, entries }) => ({
+      id,
+      name,
+      dateOfBirth,
+      gender,
+      occupation,
+      entries,
+    }),
+  );
+};
+
+const findById = (id: string): Patient | undefined => {
+  const patient = patientsData.find((p) => p.id === id);
+  return patient;
 };
 const addPatient = (object: NewPatientEntry): Patient => {
   const typedNewPatient = {
@@ -28,8 +38,22 @@ const addPatient = (object: NewPatientEntry): Patient => {
   return typedNewPatient;
 };
 
+const addEntry = (
+  patientId: string,
+  entry: EntryWithoutId,
+): Entry | undefined => {
+  const patient = patientsData.find((p) => p.id === patientId);
+  if (!patient) return undefined;
+
+  const newEntry = { id: uuid(), ...entry };
+  patient.entries.push(newEntry);
+  return newEntry;
+};
+
 export default {
   getPatients,
   addPatient,
   getNonSensitivePatients,
+  findById,
+  addEntry,
 };
