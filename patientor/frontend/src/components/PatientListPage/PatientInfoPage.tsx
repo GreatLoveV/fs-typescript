@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
+import { useParams } from "react-router-dom";
 import {
   Box,
   Container,
@@ -28,15 +29,34 @@ const PatientInfoPage = ({
 }) => {
   const [modalOpen, setModalOpen] = useState(false);
   const [error, setError] = useState<string | undefined>();
+  const [detailedPatient, setDetailedPatient] = useState<Patient | null>(null);
 
-  if (!patient) {
+  const { id } = useParams();
+
+  useEffect(() => {
+    if (id) {
+      patientService.getById(id).then((data) => {
+        setDetailedPatient(data);
+      }).catch(() => {
+        setDetailedPatient(null);
+      });
+    }
+  }, [id]);
+
+  const displayPatient = detailedPatient ?? patient ?? null;
+
+  if (!displayPatient) {
     return <div>Patient Not Found</div>;
   }
 
   const submitNewEntry = async (values: EntryWithoutId) => {
     try {
-      const entry = await patientService.addEntry(patient.id, values);
-      onEntryAdded(patient.id, entry);
+      const entry = await patientService.addEntry(displayPatient.id, values);
+      onEntryAdded(displayPatient.id, entry);
+      setDetailedPatient({
+        ...displayPatient,
+        entries: [...displayPatient.entries, entry],
+      });
       setModalOpen(false);
       setError(undefined);
     } catch (e: unknown) {
@@ -81,16 +101,16 @@ const PatientInfoPage = ({
           >
             <Typography
               variant="h4"
-              component="div"
+              component="h4"
               sx={{ fontWeight: "bold" }}
             >
-              {patient.name}
+              {displayPatient.name}
             </Typography>
-            {patient.gender === "male" && <MaleIcon color="primary" />}
-            {patient.gender === "female" && (
+            {displayPatient.gender === "male" && <MaleIcon color="primary" />}
+            {displayPatient.gender === "female" && (
               <FemaleIcon sx={{ color: "#E91E63" }} />
             )}
-            {patient.gender === "other" && <HelpOutlineIcon color="disabled" />}
+            {displayPatient.gender === "other" && <HelpOutlineIcon color="disabled" />}
           </Box>
 
           <Divider sx={{ mb: 2 }} />
@@ -105,7 +125,7 @@ const PatientInfoPage = ({
                 ssn:
               </Typography>
               <Typography variant="body1" sx={{ ml: 1 }}>
-                {patient.ssn ? patient.ssn : "-"}
+                {displayPatient.ssn ? displayPatient.ssn : "-"}
               </Typography>
             </Box>
 
@@ -118,7 +138,7 @@ const PatientInfoPage = ({
                 occupation:
               </Typography>
               <Typography variant="body1" sx={{ ml: 1 }}>
-                {patient.occupation}
+                {displayPatient.occupation}
               </Typography>
             </Box>
 
@@ -131,7 +151,7 @@ const PatientInfoPage = ({
                 date of birth:
               </Typography>
               <Typography variant="body1" sx={{ ml: 1 }}>
-                {patient.dateOfBirth}
+                {displayPatient.dateOfBirth}
               </Typography>
             </Box>
             <Box>
@@ -142,7 +162,7 @@ const PatientInfoPage = ({
               >
                 entries
               </Typography>
-              {patient.entries.map((entry) => {
+              {displayPatient.entries.map((entry) => {
                 return <EntryDetails entry={entry} key={entry.id} />;
               })}
             </Box>

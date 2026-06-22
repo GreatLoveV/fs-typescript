@@ -29,7 +29,14 @@ const addEntry = async (id: string, entry: EntryWithoutId) => {
   return data;
 };
 
+const getById = async (id: string) => {
+  const { data } = await axios.get<Patient>(
+    `${apiBaseUrl}/patients/${id}`
+  );
+  return data;
+};
+
 export default {
-  getAll, create, addEntry
+  getAll, getById, create, addEntry
 };
 

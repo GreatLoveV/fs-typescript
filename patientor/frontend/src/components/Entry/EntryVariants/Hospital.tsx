@@ -4,6 +4,7 @@ import MedicalServicesIcon from "@mui/icons-material/MedicalServices";
 
 import { type Entry } from "../../../types";
 const Hospital = ({ entry }: { entry: Entry }) => {
+  if (!("discharge" in entry)) return null;
   return (
     <Box sx={{ border: "1px solid black", borderRadius: 1, p: 1, mb: 1 }}>
       <Typography
@@ -18,6 +19,9 @@ const Hospital = ({ entry }: { entry: Entry }) => {
       </Typography>
       <Typography variant="body2" color="text.secondary">
         diagnose by {entry.specialist}
+      </Typography>
+      <Typography variant="body2" color="text.secondary">
+        discharge: {entry.discharge.date} - {entry.discharge.criteria}
       </Typography>
     </Box>
   );
